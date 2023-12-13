@@ -9,7 +9,7 @@ public struct ChatCompletion {
     public var choices: [Choices]
     public var usage: Usage?
 
-    init(
+    public init(
         id: String?,
         object: String?,
         created: Int?,

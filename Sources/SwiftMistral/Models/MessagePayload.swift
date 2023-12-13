@@ -5,7 +5,7 @@ public struct MessagePayload {
     public var role: RolePayload
     public var content: String
 
-    init(role: RolePayload, content: String) {
+    public init(role: RolePayload, content: String) {
         self.role = role
         self.content = content
     }
