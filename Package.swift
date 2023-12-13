@@ -12,7 +12,7 @@ let package = Package(
     ],
     products: [
         .library(name: "SwiftMistral", targets: ["SwiftMistral"]),
-        .executable(name: "swiftmistral", targets: ["SwiftMistralCLI"]),
+        .executable(name: "swift-mistral", targets: ["SwiftMistralCLI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),

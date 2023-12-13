@@ -3,5 +3,5 @@
 Usage
 
 ```
-$ swift run swiftmistral "<API_KEY>" 
+$ swift run swift-mistral "<API_KEY>" 
 ```

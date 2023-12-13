@@ -11,11 +11,11 @@ extension RolePayload {
     var payload: Components.Schemas.ChatCompletionRequest.messagesPayloadPayload.rolePayload {
         switch self {
         case .assistant:
-            return .assistant
+            .assistant
         case .system:
-            return .system
+            .system
         case .user:
-            return .user
+            .user
         }
     }
 }
