@@ -15,8 +15,8 @@ let package = Package(
         .executable(name: "swiftmistral", targets: ["SwiftMistralCLI"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0-alpha.1"),
-        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0-alpha.1"),
+        .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
         .package(url: "https://github.com/swift-server/swift-openapi-async-http-client", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4")

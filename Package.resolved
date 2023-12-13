@@ -140,8 +140,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-openapi-generator",
       "state" : {
-        "revision" : "e30691e5d3613994b04b142df5c52158d066b0bb",
-        "version" : "1.0.0-alpha.1"
+        "revision" : "81ea611369539630d9b8b7f1a3cbcfe8d338fabb",
+        "version" : "1.0.0"
       }
     },
     {
