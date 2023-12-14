@@ -46,7 +46,7 @@ open class MistralClient {
     /// - Parameters:
     ///   - model: The ID of the model to use for this request.
     ///   - messages: The prompt(s) to generate completions for.
-    ///   - temperature: What sampling temperature to use, between 0.0 and 2.0.
+    ///   - temperature: What sampling temperature to use, between 0.0 and 1.0.
     ///   - topP: Nucleus sampling, where the model considers the results of the tokens with `top_p` probability mass.
     ///   - maxTokens: The maximum number of tokens to generate in the completion.
     ///   - safeMode: Whether to inject a safety prompt before all conversations.
@@ -59,45 +59,67 @@ open class MistralClient {
         maxTokens: Int? = nil,
         safeMode: Bool = false,
         randomSeed: Int? = nil
-    ) async throws -> ChatCompletion {
+    ) async throws -> ChatCompletionSequence {
         let chatCompletionRequest = Components.Schemas.ChatCompletionRequest(
             model: model,
             messages: messages.map(\.payload),
             temperature: temperature,
             top_p: topP,
             max_tokens: maxTokens,
-            stream: false,
+            stream: true,
             safe_mode: safeMode,
             random_seed: randomSeed
         )
         let body = Operations.createChatCompletion.Input.Body.json(chatCompletionRequest)
         let response = try await client.createChatCompletion(Operations.createChatCompletion.Input(body: body))
-        let chatCompletion = try response.ok.body.json
-        return ChatCompletion(chatCompletion)
+        let chatCompletionStream = try response.ok.body.text_event_hyphen_stream
+        return ChatCompletionSequence(chatCompletionStream)
+    }
+}
+
+public struct ChatCompletionSequence: AsyncSequence {
+    public typealias Element = ChatCompletion
+    private let body: HTTPBody
+
+    public init(_ body: HTTPBody) {
+        self.body = body
     }
 
-    open func streamChatCompletion(
-        model: String,
-        messages: [MessagePayload],
-        temperature: Double? = nil,
-        topP: Double? = nil,
-        maxTokens: Int? = nil,
-        safeMode: Bool = false,
-        randomSeed: Int? = nil
-    ) async throws -> ChatCompletion {
-        let chatCompletionRequest = Components.Schemas.ChatCompletionRequest(
-            model: model,
-            messages: messages.map(\.payload),
-            temperature: temperature,
-            top_p: topP,
-            max_tokens: maxTokens,
-            stream: false,
-            safe_mode: safeMode,
-            random_seed: randomSeed
-        )
-        let body = Operations.createChatCompletion.Input.Body.json(chatCompletionRequest)
-        let response = try await client.createChatCompletion(Operations.createChatCompletion.Input(body: body))
-        let chatCompletion = try response.ok.body.json
-        return ChatCompletion(chatCompletion)
+    public func makeAsyncIterator() -> ChatCompletionIterator {
+        ChatCompletionIterator(body.makeAsyncIterator())
+    }
+}
+
+public struct ChatCompletionIterator: AsyncIteratorProtocol {
+    private var iterator: HTTPBody.AsyncIterator
+    private let prefix = "data: "
+    private let endString = "[DONE]"
+    private let jsonDecoder = JSONDecoder()
+
+    public init(_ iterator: HTTPBody.AsyncIterator) {
+        self.iterator = iterator
+    }
+
+    public mutating func next() async throws -> ChatCompletion? {
+        while let element = try await iterator.next() {
+            guard let allStrings = String(bytes: element, encoding: .utf8)?.split(separator: "\n") else {
+                return nil
+            }
+            for string in allStrings {
+                guard string.hasPrefix(prefix) else {
+                    continue
+                }
+                let toDecode = String(string.dropFirst(prefix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !string.isEmpty, toDecode != endString else {
+                    continue
+                }
+                guard let dataToDecode = toDecode.data(using: .utf8) else {
+                    continue
+                }
+                let partialResponse = try jsonDecoder.decode(Components.Schemas.ChatCompletionResponse.self, from: dataToDecode)
+                return ChatCompletion(partialResponse)
+            }
+        }
+        return nil
     }
 }

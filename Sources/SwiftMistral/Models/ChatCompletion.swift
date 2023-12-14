@@ -52,15 +52,18 @@ public struct ChatCompletion {
 extension ChatCompletion {
     public struct Choices {
         public var index: Int
+        public var delta: Delta?
         public var message: Message?
-        public var finishReason: FinishReason
+        public var finishReason: FinishReason?
 
         public init(
             index: Int,
+            delta: Delta?,
             message: ChatCompletion.Message?,
-            finishReason: ChatCompletion.FinishReason
+            finishReason: ChatCompletion.FinishReason?
         ) {
             self.index = index
+            self.delta = delta
             self.message = message
             self.finishReason = finishReason
         }
@@ -72,10 +75,23 @@ extension ChatCompletion {
                 } else {
                     nil
                 }
+            let delta: ChatCompletion.Delta? =
+                if let delta = choice.delta {
+                    ChatCompletion.Delta(delta)
+                } else {
+                    nil
+                }
+            let finishReason: ChatCompletion.FinishReason? =
+                if let finishReason = choice.finish_reason {
+                    ChatCompletion.FinishReason(finishReason)
+                } else {
+                    nil
+                }
             self.init(
                 index: choice.index,
+                delta: delta,
                 message: message,
-                finishReason: ChatCompletion.FinishReason(choice.finish_reason)
+                finishReason: finishReason
             )
         }
     }
@@ -96,6 +112,31 @@ extension ChatCompletion {
             case .model_length:
                 self = .modelLength
             }
+        }
+    }
+}
+
+extension ChatCompletion {
+    public struct Delta {
+        public var role: Role?
+        public var content: String?
+
+        public init(
+            role: ChatCompletion.Role?,
+            content: String?
+        ) {
+            self.role = role
+            self.content = content
+        }
+
+        init(_ message: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload.deltaPayload) {
+            let role: ChatCompletion.Role? =
+                if let role = message.role {
+                    ChatCompletion.Role(role)
+                } else {
+                    nil
+                }
+            self.init(role: role, content: message.content)
         }
     }
 }
@@ -131,6 +172,15 @@ extension ChatCompletion {
         case assistant
 
         init(_ role: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload.messagePayload.rolePayload) {
+            switch role {
+            case .user:
+                self = .user
+            case .assistant:
+                self = .assistant
+            }
+        }
+
+        init(_ role: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload.deltaPayload.rolePayload) {
             switch role {
             case .user:
                 self = .user

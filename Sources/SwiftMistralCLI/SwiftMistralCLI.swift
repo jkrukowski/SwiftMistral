@@ -13,6 +13,12 @@ struct SwiftMistralCLI: AsyncParsableCommand {
             model: "mistral-tiny", 
             messages: [.init(role: .user, content: "Hi, tell me a joke!")]
         )
-        print(chatCompletion)
+        for try await chat in chatCompletion {
+            for choice in chat.choices {
+                if let delta = choice.delta, let content = delta.content {
+                    print(content, terminator: "")
+                }
+            }
+        }
     }
 }
