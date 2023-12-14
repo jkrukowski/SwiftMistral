@@ -52,29 +52,29 @@ public struct ChatCompletion {
 extension ChatCompletion {
     public struct Choices {
         public var index: Int
-        public var messages: [Message]
+        public var message: Message?
         public var finishReason: FinishReason
 
         public init(
             index: Int,
-            messages: [ChatCompletion.Message],
+            message: ChatCompletion.Message?,
             finishReason: ChatCompletion.FinishReason
         ) {
             self.index = index
-            self.messages = messages
+            self.message = message
             self.finishReason = finishReason
         }
 
         init(_ choice: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload) {
-            let messages: [ChatCompletion.Message] =
+            let message: ChatCompletion.Message? =
                 if let message = choice.message {
-                    message.map { ChatCompletion.Message($0) }
+                    ChatCompletion.Message(message)
                 } else {
-                    []
+                    nil
                 }
             self.init(
                 index: choice.index,
-                messages: messages,
+                message: message,
                 finishReason: ChatCompletion.FinishReason(choice.finish_reason)
             )
         }
@@ -113,7 +113,7 @@ extension ChatCompletion {
             self.content = content
         }
 
-        init(_ message: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload.messagePayloadPayload) {
+        init(_ message: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload.messagePayload) {
             let role: ChatCompletion.Role? =
                 if let role = message.role {
                     ChatCompletion.Role(role)
@@ -130,7 +130,7 @@ extension ChatCompletion {
         case user
         case assistant
 
-        init(_ role: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload.messagePayloadPayload.rolePayload) {
+        init(_ role: Components.Schemas.ChatCompletionResponse.choicesPayloadPayload.messagePayload.rolePayload) {
             switch role {
             case .user:
                 self = .user

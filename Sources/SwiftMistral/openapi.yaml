@@ -125,12 +125,12 @@ components:
         temperature:
           type: number
           minimum: 0
-          maximum: 2
+          maximum: 1
           default: 0.7
           example: 0.7
           nullable: true
           description: >
-            What sampling temperature to use, between 0.0 and 2.0. Higher values
+            What sampling temperature to use, between 0.0 and 1.0. Higher values
             like 0.8 will make the output more random, while lower values like
             0.2 will make it more focused and deterministic.
 
@@ -214,26 +214,24 @@ components:
                 type: integer
                 example: 0
               message:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    role:
-                      type: string
-                      enum:
-                        - user
-                        - assistant
-                      example: assistant
-                    content:
-                      type: string
-                      example: >-
-                        I don't have a favorite condiment as I don't consume
-                        food or condiments. However, I can tell you that many
-                        people enjoy using ketchup, mayonnaise, hot sauce, soy
-                        sauce, or mustard as condiments to enhance the flavor of
-                        their meals. Some people also enjoy using herbs, spices,
-                        or vinegars as condiments. Ultimately, the best
-                        condiment is a matter of personal preference.
+                type: object
+                properties:
+                  role:
+                    type: string
+                    enum:
+                      - user
+                      - assistant
+                    example: assistant
+                  content:
+                    type: string
+                    example: >-
+                      I don't have a favorite condiment as I don't consume food
+                      or condiments. However, I can tell you that many people
+                      enjoy using ketchup, mayonnaise, hot sauce, soy sauce, or
+                      mustard as condiments to enhance the flavor of their
+                      meals. Some people also enjoy using herbs, spices, or
+                      vinegars as condiments. Ultimately, the best condiment is
+                      a matter of personal preference.
               finish_reason:
                 type: string
                 enum:

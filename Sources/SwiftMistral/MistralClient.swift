@@ -3,13 +3,20 @@ import OpenAPIAsyncHTTPClient
 import OpenAPIRuntime
 
 open class MistralClient {
-    private let client: Client
+    private let client: APIProtocol
 
-    public init(apiKey: String) throws {
-        client = try Client(
+    init(client: APIProtocol) {
+        self.client = client
+    }
+
+    public convenience init(apiKey: String) throws {
+        let client = try Client(
             serverURL: Servers.server1(),
             transport: AsyncHTTPClientTransport(),
             middlewares: [AuthMiddelware(apiKey: apiKey)]
+        )
+        self.init(
+            client: client
         )
     }
 
@@ -42,18 +49,16 @@ open class MistralClient {
     ///   - temperature: What sampling temperature to use, between 0.0 and 2.0.
     ///   - topP: Nucleus sampling, where the model considers the results of the tokens with `top_p` probability mass.
     ///   - maxTokens: The maximum number of tokens to generate in the completion.
-    ///   - stream: Whether to stream back partial progress.
     ///   - safeMode: Whether to inject a safety prompt before all conversations.
     ///   - randomSeed: The seed to use for random sampling.
     open func createChatCompletion(
         model: String,
         messages: [MessagePayload],
-        temperature: Double?,
-        topP: Double?,
-        maxTokens: Int?,
-        stream: Bool,
-        safeMode: Bool,
-        randomSeed: Int?
+        temperature: Double? = nil,
+        topP: Double? = nil,
+        maxTokens: Int? = nil,
+        safeMode: Bool = false,
+        randomSeed: Int? = nil
     ) async throws -> ChatCompletion {
         let chatCompletionRequest = Components.Schemas.ChatCompletionRequest(
             model: model,
@@ -61,7 +66,32 @@ open class MistralClient {
             temperature: temperature,
             top_p: topP,
             max_tokens: maxTokens,
-            stream: stream,
+            stream: false,
+            safe_mode: safeMode,
+            random_seed: randomSeed
+        )
+        let body = Operations.createChatCompletion.Input.Body.json(chatCompletionRequest)
+        let response = try await client.createChatCompletion(Operations.createChatCompletion.Input(body: body))
+        let chatCompletion = try response.ok.body.json
+        return ChatCompletion(chatCompletion)
+    }
+
+    open func streamChatCompletion(
+        model: String,
+        messages: [MessagePayload],
+        temperature: Double? = nil,
+        topP: Double? = nil,
+        maxTokens: Int? = nil,
+        safeMode: Bool = false,
+        randomSeed: Int? = nil
+    ) async throws -> ChatCompletion {
+        let chatCompletionRequest = Components.Schemas.ChatCompletionRequest(
+            model: model,
+            messages: messages.map(\.payload),
+            temperature: temperature,
+            top_p: topP,
+            max_tokens: maxTokens,
+            stream: false,
             safe_mode: safeMode,
             random_seed: randomSeed
         )
