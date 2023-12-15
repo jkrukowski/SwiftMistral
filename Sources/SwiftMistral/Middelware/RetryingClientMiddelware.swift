@@ -58,20 +58,18 @@ extension RetryingMiddleware: ClientMiddleware {
         guard case let .upToAttempts(count: maxAttemptCount) = policy else {
             return try await next(request, body, baseURL)
         }
-        if let body {
-            guard body.iterationBehavior == .multiple else {
-                return try await next(request, body, baseURL)
-            }
+        if let body, body.iterationBehavior != .multiple {
+            return try await next(request, body, baseURL)
         }
-        for attempt in 1 ... maxAttemptCount {
+        for _ in 0 ..< maxAttemptCount {
             let (response, responseBody) = try await next(request, body, baseURL)
-            if retryStatusCodes.contains(response.status.code), attempt < maxAttemptCount {
+            if retryStatusCodes.contains(response.status.code) {
                 try await willRetry()
             } else {
                 return (response, responseBody)
             }
         }
-        preconditionFailure("Unreachable")
+        return try await next(request, body, baseURL)
     }
 
     private func willRetry() async throws {

@@ -35,4 +35,5 @@
 --wrapcollections before-first
 --xcodeindentation disabled
 --commas inline
+--decimalgrouping 3
 --exclude Tests/XCTestManifests.swift,Tests/BadConfig,Snapshots,Build,PluginTests

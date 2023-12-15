@@ -1,6 +1,6 @@
 # Mistral Swift Client
 
-You can use the Mistral Swift client to interact with the Mistral AI API.
+Use the Mistral Swift client to interact with the Mistral AI API.
 
 ## Usage
 
@@ -8,6 +8,12 @@ Command line demo
 
 ```
 $ swift run swift-mistral "<API_KEY>" 
+```
+
+Command line help
+
+```
+$ swift run swift-mistral --help
 ```
 
 In your own code
