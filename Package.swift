@@ -58,6 +58,13 @@ let package = Package(
                     package: "SwiftFormat"
                 )
             ]
+        ),
+        .testTarget(
+            name: "SwiftMistralTests",
+            dependencies: [
+                .target(name: "SwiftMistral"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")
+            ]
         )
     ]
 )

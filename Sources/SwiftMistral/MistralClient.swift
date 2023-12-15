@@ -14,7 +14,10 @@ open class MistralClient {
         let client = try Client(
             serverURL: Servers.server1(),
             transport: AsyncHTTPClientTransport(),
-            middlewares: [AuthMiddelware(apiKey: apiKey)]
+            middlewares: [
+                AuthMiddelware(apiKey: apiKey),
+                RetryingMiddleware(retryStatusCodes: Constants.retryStatusCodes)
+            ]
         )
         self.init(
             client: client

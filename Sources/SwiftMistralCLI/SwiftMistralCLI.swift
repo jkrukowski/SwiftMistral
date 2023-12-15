@@ -10,7 +10,7 @@ struct SwiftMistralCLI: AsyncParsableCommand {
     mutating func run() async throws {
         let client = try MistralClient(apiKey: apiKey)
         let chatCompletion = try await client.createChatCompletion(
-            model: "mistral-tiny", 
+            model: "mistral-tiny",
             messages: [.init(role: .user, content: "Hi, tell me a joke!")]
         )
         for try await chat in chatCompletion {

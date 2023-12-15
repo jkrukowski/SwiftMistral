@@ -47,14 +47,16 @@ public struct ChatCompletionIterator: AsyncIteratorProtocol {
         return nil
     }
 
+    /// Populates the buffer with the next element from the body iterator.
+    /// - Returns: `true` if the buffer is not empty, `false` otherwise.
     private mutating func populateBuffer() async throws -> Bool {
         guard responseBuffer.isEmpty else {
             return true
         }
-        guard let element = try await iterator.next() else {
+        guard let bodyFragment = try await iterator.next() else {
             return !responseBuffer.isEmpty
         }
-        guard let strings = String(bytes: element, encoding: .utf8)?.split(separator: "\n") else {
+        guard let strings = String(bytes: bodyFragment, encoding: .utf8)?.split(separator: "\n") else {
             return !responseBuffer.isEmpty
         }
         responseBuffer.append(contentsOf: strings)
