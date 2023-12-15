@@ -1,3 +1,4 @@
+import Collections
 import Foundation
 import OpenAPIAsyncHTTPClient
 import OpenAPIRuntime
@@ -74,52 +75,5 @@ open class MistralClient {
         let response = try await client.createChatCompletion(Operations.createChatCompletion.Input(body: body))
         let chatCompletionStream = try response.ok.body.text_event_hyphen_stream
         return ChatCompletionSequence(chatCompletionStream)
-    }
-}
-
-public struct ChatCompletionSequence: AsyncSequence {
-    public typealias Element = ChatCompletion
-    private let body: HTTPBody
-
-    public init(_ body: HTTPBody) {
-        self.body = body
-    }
-
-    public func makeAsyncIterator() -> ChatCompletionIterator {
-        ChatCompletionIterator(body.makeAsyncIterator())
-    }
-}
-
-public struct ChatCompletionIterator: AsyncIteratorProtocol {
-    private var iterator: HTTPBody.AsyncIterator
-    private let prefix = "data: "
-    private let endString = "[DONE]"
-    private let jsonDecoder = JSONDecoder()
-
-    public init(_ iterator: HTTPBody.AsyncIterator) {
-        self.iterator = iterator
-    }
-
-    public mutating func next() async throws -> ChatCompletion? {
-        while let element = try await iterator.next() {
-            guard let allStrings = String(bytes: element, encoding: .utf8)?.split(separator: "\n") else {
-                return nil
-            }
-            for string in allStrings {
-                guard string.hasPrefix(prefix) else {
-                    continue
-                }
-                let toDecode = String(string.dropFirst(prefix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !string.isEmpty, toDecode != endString else {
-                    continue
-                }
-                guard let dataToDecode = toDecode.data(using: .utf8) else {
-                    continue
-                }
-                let partialResponse = try jsonDecoder.decode(Components.Schemas.ChatCompletionResponse.self, from: dataToDecode)
-                return ChatCompletion(partialResponse)
-            }
-        }
-        return nil
     }
 }
