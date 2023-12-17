@@ -7,7 +7,7 @@ Use the Mistral Swift client to interact with the Mistral AI API.
 Command line demo
 
 ```
-$ swift run swift-mistral "<API_KEY>" 
+$ swift run swift-mistral --api-key "<API_KEY>" --input "Hello, how are you?"
 ```
 
 Command line help

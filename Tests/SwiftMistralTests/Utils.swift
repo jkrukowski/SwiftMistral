@@ -1,3 +1,5 @@
+import Foundation
+import HTTPTypes
 import OpenAPIRuntime
 @testable import SwiftMistral
 
@@ -17,5 +19,20 @@ extension HTTPBody {
 extension ChatCompletionSequence {
     func collect() async throws -> [ChatCompletion] {
         try await reduce(into: []) { $0.append($1) }
+    }
+}
+
+extension ClientMiddleware {
+    func intercept(
+        body: OpenAPIRuntime.HTTPBody?,
+        next: @Sendable @escaping (HTTPTypes.HTTPRequest, OpenAPIRuntime.HTTPBody?, URL) async throws -> (HTTPTypes.HTTPResponse, OpenAPIRuntime.HTTPBody?)
+    ) async throws -> (HTTPResponse, HTTPBody?) {
+        try await intercept(
+            HTTPRequest(method: .get, scheme: nil, authority: nil, path: nil),
+            body: body,
+            baseURL: URL(string: "https://test.com")!,
+            operationID: "test",
+            next: next
+        )
     }
 }

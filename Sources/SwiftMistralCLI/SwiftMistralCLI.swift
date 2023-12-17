@@ -2,24 +2,23 @@ import ArgumentParser
 import Foundation
 import SwiftMistral
 
-enum MistralError: Error {
-    case missingAPIKey
-}
-
 @main
 struct SwiftMistralCLI: AsyncParsableCommand {
-    @Argument(help: "Mistral API key, if `nil` the key will be taken from `MISTRAL_API_KEY` variable.")
+    @Option(help: "Mistral API key, if `nil` the key will be taken from `MISTRAL_API_KEY` env variable.")
     var apiKey: String?
+    @Option(help: "Mistral model to use.")
+    var model: String = "mistral-tiny"
+    @Option(help: "Input to send to the model.")
+    var input: String
 
     mutating func run() async throws {
         let apiKey = apiKey ?? ProcessInfo.processInfo.environment["MISTRAL_API_KEY"]
         guard let apiKey else {
-            throw MistralError.missingAPIKey
+            throw ValidationError("Missing API key.")
         }
         let client = try MistralClient(apiKey: apiKey)
-        let input = "Hi, tell me a joke!"
         let chatCompletion = try await client.createChatCompletion(
-            model: "mistral-tiny",
+            model: model,
             messages: [.init(role: .user, content: input)]
         )
         print(input)
