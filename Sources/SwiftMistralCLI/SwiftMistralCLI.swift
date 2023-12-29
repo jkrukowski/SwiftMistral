@@ -10,13 +10,17 @@ struct SwiftMistralCLI: AsyncParsableCommand {
     var model: String = "mistral-tiny"
     @Option(help: "Input to send to the model.")
     var input: String
+    @Flag(help: "Enable verbose logging.")
+    var verbose = false
 
     mutating func run() async throws {
         let apiKey = apiKey ?? ProcessInfo.processInfo.environment["MISTRAL_API_KEY"]
         guard let apiKey else {
             throw ValidationError("Missing API key.")
         }
-        let client = try MistralClient(apiKey: apiKey)
+        var logger = defaultLogger
+        logger.logLevel = verbose ? .debug : .info
+        let client = try MistralClient(apiKey: apiKey, logger: logger)
         let chatCompletion = try await client.createChatCompletion(
             model: model,
             messages: [.init(role: .user, content: input)]

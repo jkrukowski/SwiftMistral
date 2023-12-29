@@ -1,5 +1,6 @@
 import Collections
 import Foundation
+import Logging
 import OpenAPIAsyncHTTPClient
 import OpenAPIRuntime
 
@@ -10,13 +11,14 @@ open class MistralClient {
         self.client = client
     }
 
-    public convenience init(apiKey: String) throws {
+    public convenience init(apiKey: String, logger: Logger = defaultLogger) throws {
         let client = try Client(
             serverURL: Servers.server1(),
             transport: AsyncHTTPClientTransport(),
             middlewares: [
                 AuthMiddelware(apiKey: apiKey),
-                RetryingMiddleware(retryStatusCodes: Constants.retryStatusCodes)
+                RetryingMiddleware(retryStatusCodes: Constants.retryStatusCodes),
+                LoggingMiddleware(logger: logger)
             ]
         )
         self.init(

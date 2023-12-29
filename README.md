@@ -38,6 +38,12 @@ for try await chat in chatCompletion {
 }
 ```
 
+## Format code
+
+```
+$ swift package plugin --allow-writing-to-package-directory swiftformat
+```
+
 ## Tests
 
 ```
